@@ -118,6 +118,11 @@ class DesktopClientTest {
         assertTrue(script.contains("--type app-image"));
         assertTrue(script.contains("application.example.properties"));
         assertFalse(script.contains("config\\application.properties"));
+        assertTrue(script.contains("-Dmaven.repo.local=D:\\java\\m2"));
+        assertTrue(script.contains("D:\\java\\2KOL2Host"));
+        assertTrue(script.contains("D:\\java\\m2"));
+        assertFalse(script.contains("C:\\Users"));
+        assertFalse(script.contains("%TEMP%"));
         assertTrue(script.contains("2KOL2"));
     }
 

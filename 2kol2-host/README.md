@@ -4,17 +4,32 @@
 
 尚未在真实客户端上验证。点击位置和键位都是假定值，对不上就停，不会改游戏文件，也不会读内存。
 
+## 放在哪
+
+源码和客户端都放在 `D:\java`，不要放到 C 盘用户目录。
+
+- 源码：[2kol2-host](.)，本机路径 `D:\java\2kol2-host`
+- 客户端：`D:\java\2KOL2Host\2KOL2Host.exe`
+- 配置和日志：与 exe 同一目录，也就是 `D:\java\2KOL2Host`
+- Maven 下载的依赖：`D:\java\m2`
+
+JDK 仍用 `C:\Program Files\Microsoft` 下的 `jdk-21*`，Maven 程序仍用 `C:\Program Files\Apache\apache-maven-3.9.16\bin\mvn.cmd`。这两处已经装好，脚本不会搬动它们。
+
 ## 运行前
 
 - Windows，已安装官方 WeGame 和 2KOL2。
-- 安装 JDK 17 或更高版本，并准备 Maven。
+- 上面的 JDK 21 和 Maven 已安装。打开打好的 exe 不需要再装 Maven。
 - 游戏使用**带标题栏的窗口模式**，客户区正好 **2560x1440**。全屏、无边框或分辨率不对时，程序停止且不点菜单。
 - 刷新率 120、画质「高」请事先在游戏里设好。程序只把这两项记在配置里，不会替你打开画质菜单。
 - 登录前把输入法换成英文。程序按美式键盘符号键入，不会切换输入法。
 
 ## 填写本地配置
 
-1. 进入本目录 [2kol2-host](.)。
+双击客户端时，配置在 exe 旁边：`D:\java\2KOL2Host\application.properties`。第一次打开会从旁边的 `application.example.properties` 复制出来。日志在 `D:\java\2KOL2Host\logs\kol2-host.log`。
+
+从源码目录调试时，配置仍是本目录里的 `config\application.properties`：
+
+1. 进入 [2kol2-host](.)（`D:\java\2kol2-host`）。
 2. 把 [config/application.example.properties](config/application.example.properties) 复制为 `config/application.properties`。
 3. 只在这份本地文件里填写 WeGame 目录、账号和密码。`application.properties` 已被 [.gitignore](.gitignore) 排除，不要提交。
 4. 示例里的账号和密码是空的。程序里也没有默认账号或密码。
@@ -29,26 +44,27 @@
 
 ## 生成可双击的客户端
 
-在你自己的 Windows 上执行这一条（脚本会自己找到 Maven 和 JDK，不要求它们已经在 PATH 里）：
+源码放在 `D:\java\2kol2-host` 后，在你自己的 Windows 上执行这一条（脚本会自己找到 Maven 和 JDK，不要求它们已经在 PATH 里）：
 
 ```bat
-2kol2-host\package-windows.cmd
+D:\java\2kol2-host\package-windows.cmd
 ```
 
 脚本是 [package-windows.cmd](package-windows.cmd)。它固定使用：
 
-- Maven：`C:\Program Files\Apache\apache-maven-3.9.16\bin\mvn.cmd`
+- Maven 程序：`C:\Program Files\Apache\apache-maven-3.9.16\bin\mvn.cmd`
+- Maven 本地仓库：`D:\java\m2`（参数 `-Dmaven.repo.local=D:\java\m2`）
 - JDK：`C:\Program Files\Microsoft` 下面第一个带 `jpackage.exe` 的 `jdk-21*`
 
-产物在 `2kol2-host\dist\2KOL2Host\`。生成后双击：
+生成后双击：
 
 ```text
-2kol2-host\dist\2KOL2Host\2KOL2Host.exe
+D:\java\2KOL2Host\2KOL2Host.exe
 ```
 
 这个目录里带有 JDK 21 运行时，打开 exe 不用再装 Maven。用的是 `jpackage` 的 app-image，不需要 WiX。云端是 Linux，这里没有、也不能假装已经生成这个 exe。
 
-配置放在 exe 旁边，不打进包。第一次打开如果还没有 `application.properties`，程序会从旁边的 `application.example.properties` 复制一份。不要把填好的配置提交到 git。
+配置和日志放在 exe 旁边，也就是 `D:\java\2KOL2Host`，不打进包。第一次打开如果还没有 `application.properties`，程序会从旁边的 `application.example.properties` 复制一份。不要把填好的配置提交到 git。重新打包时，脚本会先把已有的 `application.properties` 留在 `D:\java`，打完再放回去。
 
 ## 窗口里怎么用
 
@@ -59,7 +75,7 @@
 - 「试跑 1 场」是默认按钮。
 - 「每天 9:00 后打 5 场」必须先在高级项勾选「赛后重开位置已核对」。
 - 「暂停」「继续」「停止」。关掉窗口等于停止，并松开按键。
-- 下面的日志区和 `logs\kol2-host.log` 是同一步骤，不显示密码，也不显示完整账号。
+- 下面的日志区和 `D:\java\2KOL2Host\logs\kol2-host.log` 是同一步骤，不显示密码，也不显示完整账号。
 
 流程仍在 [Session.java](src/main/java/kol2/flow/Session.java)。试跑不会自动开第 2 场。程序还不能从真实画面确认终场：没有终场截图时，会继续进攻循环，直到 `match.maxMinutes`（默认 45 分钟）后停止。这只表示到时停下，不表示已经打完。
 
