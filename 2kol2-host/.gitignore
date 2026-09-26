@@ -1,0 +1,5 @@
+config/application.properties
+logs/
+runtime/
+target/
+dist/
