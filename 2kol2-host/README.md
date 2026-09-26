@@ -8,7 +8,7 @@
 
 源码和客户端都放在 `D:\java`，不要放到 C 盘用户目录。
 
-- 源码：[2kol2-host](.)，本机路径 `D:\java\2kol2-host`
+- 源码：[2kol2-host](.)，放在 `D:\java\` 下，例如 `D:\java\src`
 - 客户端：`D:\java\2KOL2Host\2KOL2Host.exe`
 - 配置和日志：与 exe 同一目录，也就是 `D:\java\2KOL2Host`
 - Maven 下载的依赖：`D:\java\m2`
@@ -29,7 +29,7 @@ JDK 仍用 `C:\Program Files\Microsoft` 下的 `jdk-21*`，Maven 程序仍用 `C
 
 从源码目录调试时，配置仍是本目录里的 `config\application.properties`：
 
-1. 进入 [2kol2-host](.)（`D:\java\2kol2-host`）。
+1. 进入 [2kol2-host](.)（本机例如 `D:\java\src`）。
 2. 把 [config/application.example.properties](config/application.example.properties) 复制为 `config/application.properties`。
 3. 只在这份本地文件里填写 WeGame 目录、账号和密码。`application.properties` 已被 [.gitignore](.gitignore) 排除，不要提交。
 4. 示例里的账号和密码是空的。程序里也没有默认账号或密码。
@@ -44,13 +44,13 @@ JDK 仍用 `C:\Program Files\Microsoft` 下的 `jdk-21*`，Maven 程序仍用 `C
 
 ## 生成可双击的客户端
 
-源码放在 `D:\java\2kol2-host` 后，在你自己的 Windows 上执行这一条（脚本会自己找到 Maven 和 JDK，不要求它们已经在 PATH 里）：
+源码放在 `D:\java\` 下后，在你自己的 Windows 上执行这一条（脚本会自己找到 Maven 和 JDK，不要求它们已经在 PATH 里）：
 
 ```bat
-D:\java\2kol2-host\package-windows.cmd
+D:\java\src\package-windows.cmd
 ```
 
-脚本是 [package-windows.cmd](package-windows.cmd)。它固定使用：
+脚本是 [package-windows.cmd](package-windows.cmd)。文件里只有英文和 ASCII，换行是 CRLF，没有 BOM，这样代码页 936 的 cmd 不会把脚本拆开。Maven 会显示下载进度。它固定使用：
 
 - Maven 程序：`C:\Program Files\Apache\apache-maven-3.9.16\bin\mvn.cmd`
 - Maven 本地仓库：`D:\java\m2`（参数 `-Dmaven.repo.local=D:\java\m2`）

@@ -110,7 +110,19 @@ class DesktopClientTest {
 
     @Test
     void windowsScriptUsesFixedToolsAndSkipsUserConfig() throws Exception {
-        String script = Files.readString(Path.of("package-windows.cmd"));
+        byte[] bytes = Files.readAllBytes(Path.of("package-windows.cmd"));
+        assertFalse(bytes.length >= 3
+                && bytes[0] == (byte) 0xEF
+                && bytes[1] == (byte) 0xBB
+                && bytes[2] == (byte) 0xBF);
+        for (byte value : bytes) {
+            assertTrue((value & 0xFF) < 128, "script must stay ASCII for cmd code page 936");
+        }
+        String script = new String(bytes, StandardCharsets.US_ASCII);
+        assertTrue(script.contains("\r\n"));
+        assertFalse(script.replace("\r\n", "").contains("\n"));
+        assertFalse(script.contains("-q"));
+        assertFalse(script.contains("chcp"));
         assertTrue(script.contains("C:\\Program Files\\Apache\\apache-maven-3.9.16\\bin\\mvn.cmd"));
         assertTrue(script.contains("C:\\Program Files\\Microsoft"));
         assertTrue(script.contains("jdk-21*"));

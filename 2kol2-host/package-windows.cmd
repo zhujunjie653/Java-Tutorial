@@ -1,11 +1,10 @@
 @echo off
 setlocal EnableExtensions
-chcp 65001 >nul
 
-rem 源码必须在 D:\java 下。产物、配置备份、Maven 仓库和临时文件都不写到 C 盘用户目录。
+rem Source must live under D:\java. Output, config backup, Maven repo, and temp stay off the user profile.
 set "HERE=%~dp0"
 if /I not "%HERE:~0,8%"=="D:\java\" (
-    echo 请把源码放在 D:\java 下再运行本脚本。
+    echo Put the source under D:\java\ before running this script.
     exit /b 1
 )
 
@@ -19,15 +18,15 @@ for /d %%D in ("%JDK_ROOT%\jdk-21*") do (
 )
 
 if not exist "%MVN%" (
-    echo 找不到 Maven：%MVN%
+    echo Maven not found: %MVN%
     exit /b 1
 )
 if not defined JDK (
-    echo 找不到 JDK 21。请确认 %JDK_ROOT% 下有 jdk-21 开头的目录。
+    echo JDK 21 not found. Expected a jdk-21* directory under %JDK_ROOT%.
     exit /b 1
 )
 if not exist "%JDK%\bin\jpackage.exe" (
-    echo 找不到 jpackage：%JDK%\bin\jpackage.exe
+    echo jpackage not found: %JDK%\bin\jpackage.exe
     exit /b 1
 )
 
@@ -40,8 +39,8 @@ set "TMP=D:\java\tmp"
 set "JAVA_HOME=%JDK%"
 set "PATH=%JDK%\bin;%PATH%"
 
-echo 使用 JDK：%JDK%
-call "%MVN%" -q -f "%~dp0pom.xml" "-Dmaven.repo.local=D:\java\m2" package
+echo Using JDK: %JDK%
+call "%MVN%" -f "%~dp0pom.xml" "-Dmaven.repo.local=D:\java\m2" package
 if errorlevel 1 exit /b 1
 
 set "STAGE=%~dp0target\jpackage-input"
@@ -66,7 +65,7 @@ if exist "%KEEP%" (
     del /q "%KEEP%"
 )
 
-echo 已生成：%OUT%\2KOL2Host.exe
-echo 配置和日志在 exe 旁边：%OUT%
-echo 第一次打开时，如果还没有 application.properties，会从示例复制。
+echo Built: %OUT%\2KOL2Host.exe
+echo Config and logs stay next to the exe: %OUT%
+echo On first launch, application.properties is copied from the example if it is missing.
 exit /b 0
