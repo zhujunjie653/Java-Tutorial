@@ -1,6 +1,7 @@
 package kol2.run;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +24,7 @@ public final class HostLog implements AutoCloseable {
     private final String account;
     private final char[] password;
     private final Path file;
+    private volatile Consumer<String> listener;
 
     private HostLog(Logger logger, String account, char[] password, Path file) {
         this.logger = logger;
@@ -62,14 +64,36 @@ public final class HostLog implements AutoCloseable {
         };
     }
 
+    /** 把已经去掉密码和完整账号的同一行交给界面。 */
+    public void setListener(Consumer<String> listener) {
+        this.listener = listener;
+    }
+
     /** 记录一步的结果。 */
     public void info(String step, String result, String detail) {
-        logger.info(line("INFO", step, result, detail));
+        publish(line("INFO", step, result, detail), false);
     }
 
     /** 记录失败或停止原因。 */
     public void error(String step, String result, String detail) {
-        logger.severe(line("ERROR", step, result, detail));
+        publish(line("ERROR", step, result, detail), true);
+    }
+
+    private void publish(String raw, boolean error) {
+        if (error) {
+            logger.severe(raw);
+        } else {
+            logger.info(raw);
+        }
+        Consumer<String> sink = listener;
+        if (sink == null) {
+            return;
+        }
+        try {
+            sink.accept(redact(raw));
+        } catch (RuntimeException ignored) {
+            // 界面刷新失败不影响写文件。
+        }
     }
 
     /** 日志文件路径。 */
@@ -107,5 +131,6 @@ public final class HostLog implements AutoCloseable {
             handler.close();
         }
         Arrays.fill(password, '\0');
+        listener = null;
     }
 }

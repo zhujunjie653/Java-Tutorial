@@ -27,48 +27,56 @@
 
 四个开关默认都是 `false`。未改成 `true` 时，程序会说明缺什么并停止，避免按未核对的坐标点击。
 
-## 试跑 1 场
+## 生成可双击的客户端
 
-在 `2kol2-host` 目录执行：
+在你自己的 Windows 上执行这一条（脚本会自己找到 Maven 和 JDK，不要求它们已经在 PATH 里）：
 
 ```bat
-mvn -q package
-java -jar target\kol2-host.jar
+2kol2-host\package-windows.cmd
 ```
 
-指定配置文件时：
+脚本是 [package-windows.cmd](package-windows.cmd)。它固定使用：
+
+- Maven：`C:\Program Files\Apache\apache-maven-3.9.16\bin\mvn.cmd`
+- JDK：`C:\Program Files\Microsoft` 下面第一个带 `jpackage.exe` 的 `jdk-21*`
+
+产物在 `2kol2-host\dist\2KOL2Host\`。生成后双击：
+
+```text
+2kol2-host\dist\2KOL2Host\2KOL2Host.exe
+```
+
+这个目录里带有 JDK 21 运行时，打开 exe 不用再装 Maven。用的是 `jpackage` 的 app-image，不需要 WiX。云端是 Linux，这里没有、也不能假装已经生成这个 exe。
+
+配置放在 exe 旁边，不打进包。第一次打开如果还没有 `application.properties`，程序会从旁边的 `application.example.properties` 复制一份。不要把填好的配置提交到 git。
+
+## 窗口里怎么用
+
+界面在 [HostFrame.java](src/main/java/kol2/ui/HostFrame.java)。没有参数时，[Kol2HostApp.java](src/main/java/kol2/Kol2HostApp.java) 会打开这个窗口。
+
+- 填写 WeGame 路径、QQ 号、密码和客户区分辨率，点「保存配置」。
+- 「高级：点击比例和按键」里是点击比例、按键和确认开关。没核对点击位置就不要打开那三个开关。
+- 「试跑 1 场」是默认按钮。
+- 「每天 9:00 后打 5 场」必须先在高级项勾选「赛后重开位置已核对」。
+- 「暂停」「继续」「停止」。关掉窗口等于停止，并松开按键。
+- 下面的日志区和 `logs\kol2-host.log` 是同一步骤，不显示密码，也不显示完整账号。
+
+流程仍在 [Session.java](src/main/java/kol2/flow/Session.java)。试跑不会自动开第 2 场。程序还不能从真实画面确认终场：没有终场截图时，会继续进攻循环，直到 `match.maxMinutes`（默认 45 分钟）后停止。这只表示到时停下，不表示已经打完。
+
+命令行还可以显式指定模式（不带参数会打开窗口，而不是直接开赛）：
 
 ```bat
 java -jar target\kol2-host.jar trial --config config\application.properties
-```
-
-不写参数也是试跑，入口在 [Kol2HostApp.java](src/main/java/kol2/Kol2HostApp.java)。流程在 [Session.java](src/main/java/kol2/flow/Session.java)：登录 WeGame，启动 2KOL2，进人机赛王朝、难度非常简单，打 1 场；无法继续就停下。
-
-运行中在同一个控制台输入：
-
-| 输入 | 作用 |
-| --- | --- |
-| `p` | 暂停，并松开已按下的键 |
-| `c` | 继续 |
-| `q` | 停止 |
-| `done` | 把本场记为未判定并结束本场 |
-| `win` / `loss` | 记下胜或负并结束本场 |
-
-日志在 `logs/kol2-host.log`，包含时间、步骤、结果和错误。不会写密码，也不会写完整账号。
-
-试跑不会自动开第 2 场。程序还不能从真实画面确认终场：没有终场截图、你也没输入 `done` / `win` / `loss` 时，它会继续进攻循环，直到 `match.maxMinutes`（默认 45 分钟）后停止。这只表示到时停下，不表示已经打完。
-
-## 之后改成每天 9:00 后打 5 场
-
-确认试跑的坐标和键位可用，并把 `postgame.confirmed` 改成 `true`（同时填好 `click.rematch`）之后，用单独命令：
-
-```bat
 java -jar target\kol2-host.jar daily --config config\application.properties
 ```
 
-这条命令会等到电脑本地时间 9:00 再开始。9:00 已过则立即开始。默认打 5 场，输了继续，打够停止。分不出终场、或赛后按钮未确认时，停止而不是继续点。
+有控制台时也可以输入 `p` 暂停、`c` 继续、`q` 停止，`done` / `win` / `loss` 结束本场。
 
-`daily` 不是当前默认命令。
+## 之后改成每天 9:00 后打 5 场
+
+在窗口的高级项里核对赛后重开位置，勾选「赛后重开位置已核对」，再点「每天 9:00 后打 5 场」。这条会等到电脑本地时间 9:00；已经过了 9:00 就马上开始。默认打 5 场，输了继续，打够停止。没勾选赛后位置时不会启动。
+
+它不是当前默认动作。默认仍是试跑 1 场。
 
 ## 假定的默认键位
 

@@ -1,5 +1,6 @@
 package kol2.config;
 
+import kol2.AppHome;
 import kol2.Halt;
 import kol2.win.AsciiTyping;
 import kol2.win.KeyCodes;
@@ -127,9 +128,9 @@ public final class ConfigLoader {
                 ratio(properties, "click.enter.y"),
                 ratio(properties, "click.rematch.x"),
                 ratio(properties, "click.rematch.y"),
-                Path.of(required(properties, "log.dir")),
-                Path.of(required(properties, "instance.lock")),
-                template.isEmpty() ? null : Path.of(template));
+                AppHome.resolve(Path.of(required(properties, "log.dir"))),
+                AppHome.resolve(Path.of(required(properties, "instance.lock"))),
+                template.isEmpty() ? null : AppHome.resolve(Path.of(template)));
     }
 
     private static int optionalKey(Properties properties, String key) {
